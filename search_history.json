@@ -1,0 +1,110 @@
+[
+    {
+        "city": "seoul",
+        "temperature": 6.76,
+        "humidity": 87,
+        "datetime": "2025-03-20 15:12:07"
+    },
+    {
+        "city": "Accra",
+        "temperature": 30.16,
+        "humidity": 65,
+        "datetime": "2025-03-20 15:12:17"
+    },
+    {
+        "city": "Beijing",
+        "temperature": 17.94,
+        "humidity": 15,
+        "datetime": "2025-03-20 15:12:24"
+    },
+    {
+        "city": "Shanghai",
+        "temperature": 12.92,
+        "humidity": 62,
+        "datetime": "2025-03-22 23:10:09"
+    },
+    {
+        "city": "kota",
+        "temperature": 28.09,
+        "humidity": 16,
+        "datetime": "2025-03-25 18:39:53"
+    },
+    {
+        "city": "accra",
+        "temperature": 28.54,
+        "humidity": 75,
+        "datetime": "2025-03-25 18:56:23"
+    },
+    {
+        "city": "accra",
+        "temperature": 28.54,
+        "humidity": 75,
+        "datetime": "2025-03-25 18:56:56"
+    },
+    {
+        "city": "accra",
+        "temperature": 28.54,
+        "humidity": 75,
+        "datetime": "2025-03-25 18:57:00"
+    },
+    {
+        "city": "accra",
+        "temperature": 28.54,
+        "humidity": 75,
+        "datetime": "2025-03-25 18:57:05"
+    },
+    {
+        "city": "Seoul",
+        "temperature": 5.76,
+        "humidity": 87,
+        "datetime": "2025-03-25 18:57:23"
+    },
+    {
+        "city": "Beijing",
+        "temperature": 8.94,
+        "humidity": 44,
+        "datetime": "2025-03-25 18:58:46"
+    },
+    {
+        "city": "Beijing",
+        "temperature": 8.94,
+        "humidity": 44,
+        "datetime": "2025-03-25 19:00:23"
+    },
+    {
+        "city": " Seoul",
+        "temperature": 2.76,
+        "humidity": 100,
+        "datetime": "2025-03-25 19:55:50"
+    },
+    {
+        "city": "Beijing",
+        "temperature": 7.94,
+        "humidity": 45,
+        "datetime": "2025-03-25 19:57:59"
+    },
+    {
+        "city": "toronto",
+        "temperature": 3.42,
+        "humidity": 61,
+        "datetime": "2025-03-25 19:58:10"
+    },
+    {
+        "city": "Accra",
+        "temperature": 27.23,
+        "humidity": 89,
+        "datetime": "2025-03-25 19:58:36"
+    },
+    {
+        "city": "Accra",
+        "temperature": 27.23,
+        "humidity": 89,
+        "datetime": "2025-03-25 20:17:27"
+    },
+    {
+        "city": "Accra",
+        "temperature": 29.03,
+        "humidity": 74,
+        "datetime": "2025-03-27 18:15:49"
+    }
+]

@@ -19,6 +19,7 @@ from requests.exceptions import RequestException, ConnectionError
 from urllib3.exceptions import MaxRetryError, NameResolutionError
 from dotenv import load_dotenv
 import os
+import json
 
 
 
@@ -64,6 +65,7 @@ class WeatherApp(ctk.CTk):
             # Load images using CTkImage.
         self.searchbar_cloud_image = ctk.CTkImage(light_image=Image.open("images/searchbar_cloud1.png"), size=(30, 30))
         self.searchbar_search_image = ctk.CTkImage(light_image=Image.open("images/search_icon.png"), size=(30, 30))
+        self.history_image = ctk.CTkImage(light_image=Image.open("images/history_image2.png"), size=(30, 30))
 
             # Left-side image.
         self.left_label_in_searchbar = ctk.CTkLabel(self.searchbar_frame, image=self.searchbar_cloud_image, text="",
@@ -86,6 +88,8 @@ class WeatherApp(ctk.CTk):
                                             command=self.getweather)
         self.search_button.pack(side="right", padx=5, pady=5)
 
+        history_button = ctk.CTkButton(self,image=self.history_image,text="",fg_color="transparent", width=20,height=20,command=self.history_toplevel)
+        history_button.place(relx=0.9, rely=0.10)   
 
 
          # Helper function to compute the center coordinates based on relative placement.
@@ -149,9 +153,98 @@ class WeatherApp(ctk.CTk):
                                                             font=("Arial", 20, "bold"), fill="black", anchor="center")
         self.flag_label = self.canvas.create_image(flag_position_center, anchor="center")  # Create the image placeholder
 
-# 
+    def save_search_to_json(self, city, temperature, humidity):
+        try:
+            with open("search_history.json", "r") as file:
+                searches = json.load(file) or []  # Default to empty list if file is empty or invalid
+        except (FileNotFoundError, json.JSONDecodeError):
+            searches = []  # Initialize as empty list if file doesn't exist or is empty
+        
+        # Append new search entry
+        searches.append({
+            "city": city,
+            "temperature": temperature,
+            "humidity": humidity,
+            "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        })
+        
+        # Keep only the last 20 searches
+        searches = searches[-20:]
+        
+        with open("search_history.json", "w") as file:
+            json.dump(searches, file, indent=4)
+
+    def history_toplevel(self):
+        # Check if history window already exists
+        if hasattr(self, "history_window") and self.history_window.winfo_exists():
+            self.update_history_window()  # If window exists, update its content
+            return
+        
+        try:
+            with open("search_history.json", "r") as file:
+                searches = json.load(file)  # Load search history
+        except (FileNotFoundError, json.JSONDecodeError):
+            searches = []
+
+        # Create a new window
+        self.history_window = ctk.CTkToplevel(self)
+        self.history_window.geometry("300x600")
+        self.history_window.title("SEARCH HISTORY")
+
+        # Bring the window to the front
+        self.history_window.lift()  # Bring the window to the top
+        self.history_window.attributes('-topmost', True)  # Ensure it stays on top
+        self.history_window.after(1, lambda: self.history_window.focus_force())  # Force focus
+
+        # Create a main frame to hold scrollable content and button
+        self.main_history_frame = ctk.CTkFrame(self.history_window)
+        self.main_history_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Scrollable frame for search history
+        self.scrollable_frame = ctk.CTkScrollableFrame(self.main_history_frame, width=280, height=500)
+        self.scrollable_frame.pack(fill="both", expand=True, padx=5, pady=(5, 10))
+
+        # Populate the history
+        self.update_history_window()
+
+        # Button to clear history
+        clear_button = ctk.CTkButton(self.main_history_frame, text="Clear History", command=self.clear_history)
+        clear_button.pack(fill="x", pady=(5, 10))
+
+    def clear_history(self):
+        with open("search_history.json", "w") as file:
+            json.dump([], file)  # Overwrite with an empty list
+
+        self.history_window.destroy()  # Close and reopen history window
+        self.history_toplevel()
+
+
+    def update_history_window(self):
+        #Update history window content dynamically.
+        try:
+            with open("search_history.json", "r") as file:
+                searches = json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            searches = []
+
+        # Clear existing content inside scrollable frame
+        for widget in self.scrollable_frame.winfo_children():
+            widget.destroy()
+
+        # Populate with updated history
+        for entry in reversed(searches):
+            history_label = ctk.CTkLabel(
+                self.scrollable_frame,
+                text=f"{entry['city']}\nTemperature: {entry['temperature']}°C\n"
+                    f"Humidity: {entry['humidity']}%\nSearched on: {entry['datetime']}",
+                font=("Arial", 14),
+                justify="left"
+            )
+            history_label.pack(pady=5, padx=10, anchor="w", fill="x")   
+
+
     def is_daytime(self, sunrise, sunset, timezone_offset):
-        # """Determine if it's currently daytime based on sunrise and sunset times."""
+        # Determine if it's currently daytime based on sunrise and sunset times.
         sunrise_time = datetime.fromtimestamp(sunrise + timezone_offset, tz=timezone.utc)
         sunset_time = datetime.fromtimestamp(sunset + timezone_offset, tz=timezone.utc)
         current_time = datetime.now(timezone.utc) + timedelta(seconds=timezone_offset)
@@ -159,7 +252,7 @@ class WeatherApp(ctk.CTk):
 
 
     def update_background(self, is_day):
-        # """Update the background image based on day or night."""
+        # Update the background image based on day or night.
         new_bg = self.day_bg if is_day else self.night_bg
         self.canvas.itemconfig(self.bg_photo, image=new_bg)
 
@@ -295,7 +388,7 @@ class WeatherApp(ctk.CTk):
 
             response_forecast = requests.get(api_url_forecast)
             response_forecast.raise_for_status()  # Raise an exception for HTTP errors
-            json_forecast_data = response_forecast.json()
+            json_forecast_data = response_forecast.json() 
 
             # Update weather data
             temperature = json_current_data["main"]["temp"]
@@ -313,7 +406,7 @@ class WeatherApp(ctk.CTk):
             self.canvas.itemconfig(self.windspeed_text_id, text=f"Windspeed:\n{windspeed} m/s")
             self.canvas.itemconfig(self.cloud_text_id, text=f"Clouds:\n{cloud_description.capitalize()}")
 
-                        # Load the images for the four weather parameters siting on frame 1
+            # Load the images for the four weather parameters siting on frame 1
             self.pressure_icon = ImageTk.PhotoImage(Image.open("images/pressure1.png"))
             self.humidity_icon = ImageTk.PhotoImage(Image.open("images/humidity1.png"))
             self.wind_icon = ImageTk.PhotoImage(Image.open("images/windspeed1.png"))
@@ -323,9 +416,14 @@ class WeatherApp(ctk.CTk):
             self.pressure_img_id = self.canvas.create_image(480, 585,anchor="w", image=self.pressure_icon)
             self.humidity_img_id = self.canvas.create_image(160,585, anchor="w", image=self.humidity_icon)
             self.wind_img_id = self.canvas.create_image(750, 585, anchor="w", image=self.wind_icon)
-            self.description_img_id = self.canvas.create_image(1070, 585, anchor="w", image=self.description_icon)
+            self.description_img_id = self.canvas.create_image(1050, 585, anchor="w", image=self.description_icon)
 
+            self.save_search_to_json(city, temperature, humidity)
+            
 
+            # If history window exists, update it
+            if hasattr(self, "history_window") and self.history_window.winfo_exists():
+                self.update_history_window()
 
             # Update forecast data
             self.frame1 = ctk.CTkScrollableFrame(self, fg_color="#fff",
@@ -342,9 +440,10 @@ class WeatherApp(ctk.CTk):
                 formatted_date = datetime_object.strftime("%a %I:%M %p")
                 tmp = json_forecast_data["list"][i]["main"]["temp"]
 
+                # Placing labels at the top of frame1
                 lbl = ctk.CTkLabel(frame, text=formatted_date, width=120, height=50, font=("Arial", 16, "bold"),
                                 text_color="white", fg_color="black", corner_radius=20)
-                lbl.pack(side="top", fill="x", padx=5, pady=5)  # Placing labels at the top of frame1
+                lbl.pack(side="top", fill="x", padx=5, pady=5)  
 
                 icon_code = json_forecast_data["list"][i]["weather"][0]["icon"]
                 icon_path = f"icon/{icon_code}@2x.png"
@@ -405,14 +504,12 @@ class WeatherApp(ctk.CTk):
         self.spinner_angle = 0
 
         # Define center and radius as instance variables
-        self.center_x = 750  # 1500 / 2
-        self.center_y = 300  # 900 / 2
+        self.center_x = 750
+        self.center_y = 300 
         self.radius = 50  # Radius of the spinner circle
 
 
-        dot_colors = [
-        "red", "green", "blue", "orange",
-        "purple", "red", "magenta", "yellow"]
+        dot_colors = ["#00FFFF", "#00D4FF", "#00AAFF", "#008CFF","#006EFF", "#004C99", "#003366", "#001F4D"]
 
 
         # Create 8 dots in a circular pattern
