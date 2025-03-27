@@ -1,17 +1,5 @@
 [
     {
-        "city": "seoul",
-        "temperature": 6.76,
-        "humidity": 87,
-        "datetime": "2025-03-20 15:12:07"
-    },
-    {
-        "city": "Accra",
-        "temperature": 30.16,
-        "humidity": 65,
-        "datetime": "2025-03-20 15:12:17"
-    },
-    {
         "city": "Beijing",
         "temperature": 17.94,
         "humidity": 15,
@@ -106,5 +94,29 @@
         "temperature": 29.03,
         "humidity": 74,
         "datetime": "2025-03-27 18:15:49"
+    },
+    {
+        "city": "Accra",
+        "temperature": 28.78,
+        "humidity": 76,
+        "datetime": "2025-03-27 19:09:58"
+    },
+    {
+        "city": "new york",
+        "temperature": 10.19,
+        "humidity": 23,
+        "datetime": "2025-03-27 19:13:44"
+    },
+    {
+        "city": "tokyo",
+        "temperature": 17.38,
+        "humidity": 88,
+        "datetime": "2025-03-27 19:14:19"
+    },
+    {
+        "city": "london",
+        "temperature": 10.36,
+        "humidity": 80,
+        "datetime": "2025-03-27 19:38:21"
     }
 ]
