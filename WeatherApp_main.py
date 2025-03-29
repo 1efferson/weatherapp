@@ -89,7 +89,7 @@ class WeatherApp(ctk.CTk):
         self.search_button.pack(side="right", padx=5, pady=5)
 
         history_button = ctk.CTkButton(self,image=self.history_image,text="",fg_color="transparent", width=20,height=20,command=self.history_toplevel)
-        history_button.place(relx=0.9, rely=0.10)   
+        history_button.place(relx=0.9, rely=0.09)   
 
 
          # Helper function to compute the center coordinates based on relative placement.
@@ -98,7 +98,7 @@ class WeatherApp(ctk.CTk):
                 cy = rely * 900 + (relheight * 900) / 2
                 return cx, cy
 
-        big_temp_center = calculate_center_coordinates(0.7, 0.2, 0.24, 0.3)
+        big_temp_center = calculate_center_coordinates(0.7, 0.2, 0.3, 0.3)
 
         flag_position_center = calculate_center_coordinates (0.72, 0.02, 0.2, 0.17)
 
@@ -112,7 +112,7 @@ class WeatherApp(ctk.CTk):
 
         country_center = calculate_center_coordinates(0.72, 0.02, 0.2, 0.09)
 
-        lonlat_center = calculate_center_coordinates(0.7, 0.2, 0.24, 0.1)
+        lonlat_center = calculate_center_coordinates(0.7, 0.19, 0.29, 0.09)
 
         humidity_center = calculate_center_coordinates(0.12, 0.6, 0.15, 0.1)
 
@@ -120,7 +120,7 @@ class WeatherApp(ctk.CTk):
 
         windspeed_center = calculate_center_coordinates(0.54, 0.6, 0.15, 0.1)
 
-        cloud_description_center = calculate_center_coordinates(0.74, 0.6, 0.15, 0.1)
+        cloud_description_center = calculate_center_coordinates(0.74, 0.6, 0.17, 0.1)
 
 
 
@@ -208,8 +208,23 @@ class WeatherApp(ctk.CTk):
         self.update_history_window()
 
         # Button to clear history
-        clear_button = ctk.CTkButton(self.main_history_frame, text="Clear History", command=self.clear_history)
+        clear_button = ctk.CTkButton(self.main_history_frame, text="Clear History", command=self.confirm_clear_history)
         clear_button.pack(fill="x", pady=(5, 10))
+
+    def confirm_clear_history(self):    
+        # Create a messagebox asking for confirmation
+        msg = CTkMessagebox(title="Confirm Clear", 
+                            message="Are you sure you want to clear all history?",
+                            icon="question", 
+                            option_1="Cancel", 
+                            option_2="Clear")
+        
+        # Wait for user response. blocks other exercusions until response is chosen
+        response = msg.get()
+        
+        # If user chooses "Clear", proceed with clearing history
+        if response == "Clear":
+            self.clear_history()
 
     def clear_history(self):
         with open("search_history.json", "w") as file:
@@ -240,9 +255,8 @@ class WeatherApp(ctk.CTk):
                 font=("Arial", 14),
                 justify="left"
             )
-            history_label.pack(pady=5, padx=10, anchor="w", fill="x")   
-
-
+            history_label.pack(pady=5, padx=10, anchor="w", fill="x")
+            
     def is_daytime(self, sunrise, sunset, timezone_offset):
         # Determine if it's currently daytime based on sunrise and sunset times.
         sunrise_time = datetime.fromtimestamp(sunrise + timezone_offset, tz=timezone.utc)
@@ -304,7 +318,7 @@ class WeatherApp(ctk.CTk):
             # Handle network-related errors
             CTkMessagebox(
                 title="Error",
-                message="No internet, check your network connection.",
+                message="No internet, check your network connection or servers might be down",
                 icon="cancel",
                 sound=True,
                 bg_color="white",
@@ -317,7 +331,7 @@ class WeatherApp(ctk.CTk):
             # Handle other unexpected errors
             CTkMessagebox(
                 title="Error",
-                message=f"An unexpected error occurred: {e}",
+                message=f"Spelling of the city might be wrong",
                 icon="cancel",
                 sound=True,
                 bg_color="white",
@@ -390,7 +404,7 @@ class WeatherApp(ctk.CTk):
             response_forecast.raise_for_status()  # Raise an exception for HTTP errors
             json_forecast_data = response_forecast.json() 
 
-            # Update weather data
+            # Update weather dataderfgtdsf
             temperature = json_current_data["main"]["temp"]
             humidity = json_current_data["main"]["humidity"]
             pressure = json_current_data["main"]["pressure"]
@@ -411,12 +425,16 @@ class WeatherApp(ctk.CTk):
             self.humidity_icon = ImageTk.PhotoImage(Image.open("images/humidity1.png"))
             self.wind_icon = ImageTk.PhotoImage(Image.open("images/windspeed1.png"))
             self.description_icon = ImageTk.PhotoImage(Image.open("images/cloud_description1.png"))
+            self.big_temp_icon = ImageTk.PhotoImage(Image.open("images/bigtemp.png"))
+            self.lonlat_icon = ImageTk.PhotoImage(Image.open("images/lon_lat.png"))
 
             # Create the image on canvas with specified coordinates (x, y)
             self.pressure_img_id = self.canvas.create_image(480, 585,anchor="w", image=self.pressure_icon)
             self.humidity_img_id = self.canvas.create_image(160,585, anchor="w", image=self.humidity_icon)
             self.wind_img_id = self.canvas.create_image(750, 585, anchor="w", image=self.wind_icon)
             self.description_img_id = self.canvas.create_image(1050, 585, anchor="w", image=self.description_icon)
+            self.big_temp_icon1 = self.canvas.create_image(1075, 315, anchor="w", image=self.big_temp_icon)
+            self.lonlat_icon1  = self.canvas.create_image(1110, 212, anchor="w", image=self.lonlat_icon)
 
             self.save_search_to_json(city, temperature, humidity)
             
@@ -465,7 +483,7 @@ class WeatherApp(ctk.CTk):
             # Handle other API request errors
             CTkMessagebox(
                 title="Error",
-                message=f"API Request Failed: {e}",
+                message=f"API Request Failed: Check spelling",
                 icon="cancel",
                 sound=True,
                 bg_color="white",
@@ -479,7 +497,7 @@ class WeatherApp(ctk.CTk):
             self.canvas.itemconfig(self.country_id, text=f"{country}")
             self.canvas.itemconfig(self.city_name_id, text=f"{city}".capitalize())
 
-            self.canvas.itemconfig(self.lonlat_text_id, text=f"Lon: {round(location.longitude, 2)}°E, Lat: {round(location.latitude, 2)}°N")
+            self.canvas.itemconfig(self.lonlat_text_id, text=f"{round(location.longitude, 2)}°E,{round(location.latitude, 2)}°N")
             self.canvas.itemconfig(self.time_text_id, text=f"{current_time}")
             self.canvas.itemconfig(self.day_text_id, text=local_time.strftime("%A"))
             self.canvas.itemconfig(self.date_text_id, text=local_time.strftime("%d %B %Y"))
@@ -495,7 +513,7 @@ class WeatherApp(ctk.CTk):
             self.toggle_mode(is_day)  # Update text colors based on day/night
 
         except requests.exceptions.RequestException as e:
-            CTkMessagebox(title="Error", message=f"API Request Failed: {e}", icon="cancel", sound=True)
+            CTkMessagebox(title="Error", message=f"API Request Failed: Check internet connection", icon="cancel", sound=True)
 
     def start_spinner(self):
         """Start the spinning dots animation."""
