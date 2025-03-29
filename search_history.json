@@ -1,11 +1,5 @@
 [
     {
-        "city": "japan",
-        "temperature": 9.27,
-        "humidity": 89,
-        "datetime": "2025-03-28 22:35:17"
-    },
-    {
         "city": "accra",
         "temperature": 28.23,
         "humidity": 83,
@@ -118,5 +112,11 @@
         "temperature": 31.23,
         "humidity": 70,
         "datetime": "2025-03-29 16:24:19"
+    },
+    {
+        "city": "accra",
+        "temperature": 31.23,
+        "humidity": 70,
+        "datetime": "2025-03-29 16:57:00"
     }
 ]
