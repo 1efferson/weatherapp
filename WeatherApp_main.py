@@ -104,11 +104,11 @@ class WeatherApp(ctk.CTk):
 
         city_name_center= calculate_center_coordinates(0.72, 0.12, 0.2, 0.06)
 
-        time_center = calculate_center_coordinates(0.1, 0.08, 0.1, 0.1)
+        time_center = calculate_center_coordinates(0.1, 0.07, 0.1, 0.1)
 
-        day_center = calculate_center_coordinates(0.1, 0.2, 0.1, 0.06)
+        day_center = calculate_center_coordinates(0.1, 0.16, 0.01, 0.1)
 
-        date_center = calculate_center_coordinates(0.1, 0.3, 0.1, 0.06)
+        date_center = calculate_center_coordinates(0.1, 0.19, 0.05, 0.1)
 
         country_center = calculate_center_coordinates(0.72, 0.02, 0.2, 0.09)
 
@@ -427,14 +427,18 @@ class WeatherApp(ctk.CTk):
             self.description_icon = ImageTk.PhotoImage(Image.open("images/cloud_description1.png"))
             self.big_temp_icon = ImageTk.PhotoImage(Image.open("images/bigtemp.png"))
             self.lonlat_icon = ImageTk.PhotoImage(Image.open("images/lon_lat.png"))
+            self.date_icon = ImageTk.PhotoImage(Image.open("images/date.png"))
+            self.time_icon = ImageTk.PhotoImage(Image.open("images/time.png"))
 
             # Create the image on canvas with specified coordinates (x, y)
             self.pressure_img_id = self.canvas.create_image(480, 585,anchor="w", image=self.pressure_icon)
             self.humidity_img_id = self.canvas.create_image(160,585, anchor="w", image=self.humidity_icon)
             self.wind_img_id = self.canvas.create_image(750, 585, anchor="w", image=self.wind_icon)
             self.description_img_id = self.canvas.create_image(1050, 585, anchor="w", image=self.description_icon)
-            self.big_temp_icon1 = self.canvas.create_image(1075, 315, anchor="w", image=self.big_temp_icon)
-            self.lonlat_icon1  = self.canvas.create_image(1110, 212, anchor="w", image=self.lonlat_icon)
+            self.big_temp_img_id = self.canvas.create_image(1075, 315, anchor="w", image=self.big_temp_icon)
+            self.lonlat_img_id  = self.canvas.create_image(1110, 212, anchor="w", image=self.lonlat_icon)
+            self.date_img_id  = self.canvas.create_image(50, 200, anchor="w", image=self.date_icon)
+            self.time_img_id  = self.canvas.create_image(50, 110, anchor="w", image=self.time_icon)
 
             self.save_search_to_json(city, temperature, humidity)
             
