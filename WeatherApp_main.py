@@ -38,13 +38,17 @@ class WeatherApp(ctk.CTk):
         self.minsize(800, 600)
         self.maxsize(1500, 900)
 
+         # Initialize cities data
+        self.cities_list = []  # Initialize empty list
+        self.load_cities_data()  # Load cities data
+
 # 
         # Canvas for background
         self.canvas = tk.Canvas(self, width=1920, height=1000, highlightthickness=0)
         self.canvas.place(x=0, y=0, relwidth=1, relheight=1)
 # 
         # Load background images
-        self.day_bg = ImageTk.PhotoImage(Image.open("images/day1.jpg").resize((1920, 1000)))
+        self.day_bg = ImageTk.PhotoImage(Image.open("images/day3.jpg").resize((1920, 1000)))
         self.night_bg = ImageTk.PhotoImage(Image.open("images/night7.jpg").resize((1920, 1000)))
         self.bg_photo = self.canvas.create_image(0, 0, anchor="nw", image=self.day_bg)
 
@@ -55,6 +59,20 @@ class WeatherApp(ctk.CTk):
         self.spinner_dots = []
         self.spinner_angle = 0
         self.spinner_active = False
+
+
+    def load_cities_data(self):
+        # Load cities data from JSON file
+        try:
+            with open("cities.json", "r", encoding="utf-8") as file:
+                self.cities_list = json.load(file)
+            print(f"Successfully loaded {len(self.cities_list)} cities")
+        except FileNotFoundError:
+            print("Error: cities.json file not found")
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON format in cities.json")
+        except Exception as e:
+            print(f"Unexpected error loading cities: {e}")
 
     def initialize_Graphical_Interface(self):
        # Creating a frame for the searchbar to put the two images inside of it.
@@ -73,15 +91,38 @@ class WeatherApp(ctk.CTk):
         self.left_label_in_searchbar.pack(side="left", padx=5, pady=5)
 
             # Add an entry box to the search bar.
-        self.search_entry = ctk.CTkEntry(self.searchbar_frame, font=("Arial", 16), text_color="black",
-                                            placeholder_text="Search City Here", placeholder_text_color="blue",
-                                            fg_color="white", border_width=0)
+        self.search_entry = ctk.CTkEntry(self.searchbar_frame, 
+                                       font=("Arial", 16), 
+                                       text_color="black",
+                                       placeholder_text="Search City Here",
+                                       placeholder_text_color="blue",
+                                       fg_color="white", 
+                                       border_width=0)
         self.search_entry.pack(side="left", expand=True, fill="both", padx=5)
-        self.search_entry.focus()  # Auto-focus on entry field
+        self.search_entry.bind("<KeyRelease>", self.update_suggestions)
+        self.search_entry.focus()
+
+        # Create suggestion dropdown
+        self.suggestion_menu = ctk.CTkOptionMenu(
+            self.searchbar_frame,
+            values=[],
+            fg_color="white",
+            text_color="black",
+            button_color="white",
+            button_hover_color="lightgray",
+            anchor="w",
+            command=self.select_city
+        )
+        self.suggestion_menu.pack(side="left", fill="x", expand=True)
+        self.suggestion_menu.set("")
+        self.suggestion_menu.pack_forget()
 
         # Bind the Enter key on the search entry to trigger the getweather method.
         self.search_entry.bind("<Return>", self.getweather)
 
+        # Bind key release event for suggestions
+        self.search_entry.bind("<KeyRelease>", self.update_suggestions)
+    
         # Search button with the right-side search image.
         self.search_button = ctk.CTkButton(self.searchbar_frame, image=self.searchbar_search_image, text="",
                                             fg_color="white", hover_color="lightgrey", width=20, height=20,
@@ -91,67 +132,67 @@ class WeatherApp(ctk.CTk):
         history_button = ctk.CTkButton(self,image=self.history_image,text="",fg_color="transparent", width=20,height=20,command=self.history_toplevel)
         history_button.place(relx=0.9, rely=0.09)   
 
+        # Create canvas text items
+        self.big_temp_text_id = self.canvas.create_text(1275, 315, text="",font=("Arial", 70, "bold"), fill="black", anchor="center")
 
-         # Helper function to compute the center coordinates based on relative placement.
-        def calculate_center_coordinates(relx, rely, relwidth, relheight):
-                cx = relx * 1500 + (relwidth * 1500) / 2
-                cy = rely * 900 + (relheight * 900) / 2
-                return cx, cy
+        self.city_name_id = self.canvas.create_text(1230, 135, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        big_temp_center = calculate_center_coordinates(0.7, 0.2, 0.3, 0.3)
+        self.country_id = self.canvas.create_text(1230, 60, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        flag_position_center = calculate_center_coordinates (0.72, 0.02, 0.2, 0.17)
+        self.time_text_id = self.canvas.create_text(225, 108, text="",font=("Arial", 50, "bold"), fill="black", anchor="center")
 
-        city_name_center= calculate_center_coordinates(0.72, 0.12, 0.2, 0.06)
+        self.day_text_id = self.canvas.create_text(160, 189, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        time_center = calculate_center_coordinates(0.1, 0.07, 0.1, 0.1)
+        self.date_text_id = self.canvas.create_text(180, 216, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        day_center = calculate_center_coordinates(0.1, 0.16, 0.01, 0.1)
+        self.lonlat_text_id = self.canvas.create_text(1260, 211, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        date_center = calculate_center_coordinates(0.1, 0.19, 0.05, 0.1)
+        self.humidity_text_id = self.canvas.create_text(292, 585, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        country_center = calculate_center_coordinates(0.72, 0.02, 0.2, 0.09)
+        self.pressure_text_id = self.canvas.create_text(607, 585, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        lonlat_center = calculate_center_coordinates(0.7, 0.19, 0.29, 0.09)
+        self.windspeed_text_id = self.canvas.create_text(922, 585, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        humidity_center = calculate_center_coordinates(0.12, 0.6, 0.15, 0.1)
+        self.cloud_text_id = self.canvas.create_text(1237, 585, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        pressure_center = calculate_center_coordinates(0.33, 0.6, 0.15, 0.1)
+        self.flag_label = self.canvas.create_image(1230, 94, anchor="center")
 
-        windspeed_center = calculate_center_coordinates(0.54, 0.6, 0.15, 0.1)
+    def update_suggestions(self, event):
+        #Update city suggestions dropdown based on user input
+        current_text = self.search_entry.get().strip()
 
-        cloud_description_center = calculate_center_coordinates(0.74, 0.6, 0.17, 0.1)
+        if len(current_text) < 1:  # Hide dropdown if input is empty
+            self.suggestion_menu.pack_forget()
+            return
+
+        matching_cities = [
+            city for city in self.cities_list 
+            if city.get("name", "").capitalize().startswith(current_text.capitalize())][:] #all city suggestions available
+
+        if matching_cities:
+            self.suggestion_menu.configure(
+                values=[f"{city['name']}, {city.get('country', '')}" for city in matching_cities]
+            )
+            self.suggestion_menu.pack(side="left", fill="x", expand=True)  # Ensure dropdown appears
+        else:
+            self.suggestion_menu.pack_forget()
 
 
 
-            # Create canvas text items without default texts.
-        self.big_temp_text_id = self.canvas.create_text(big_temp_center, text="",
-                                                            font=("Arial", 70, "bold"), fill="black", anchor="center")
-        
-        self.city_name_id = self.canvas.create_text(city_name_center, text="",
-                                                            font=("Arial", 20, "bold"), fill="black", anchor="center")
+    def select_city(self, choice):
+        # Handle city selection from dropdown
+        city_name = choice.split(",")[0].strip()
+        self.search_entry.delete(0, "end")
+        self.search_entry.insert(0, city_name)
+        self.suggestion_menu.pack_forget()
+        self.getweather()  # Fetch weather for selected city
 
-        self.country_id= self.canvas.create_text(country_center, text="",
-                                                            font=("Arial", 20, "bold"), fill="black", anchor="center")
 
-        self.time_text_id = self.canvas.create_text(time_center, text="",
-                                                        font=("Arial", 50, "bold"), fill="black", anchor="center")
-        self.day_text_id = self.canvas.create_text(day_center, text="",
-                                                        font=("Arial", 20, "bold"), fill="black", anchor="center")
-        self.date_text_id = self.canvas.create_text(date_center, text="",
-                                                        font=("Arial", 20, "bold"), fill="black", anchor="center")
-       
-        self.lonlat_text_id = self.canvas.create_text(lonlat_center, text="",
-                                                            font=("Arial", 20, "bold"), fill="black", anchor="center")
-        self.humidity_text_id = self.canvas.create_text(humidity_center, text="",
-                                                            font=("Arial", 20, "bold"), fill="black", anchor="center")
-        self.pressure_text_id = self.canvas.create_text(pressure_center, text="",
-                                                            font=("Arial", 20, "bold"), fill="black", anchor="center")
-        self.windspeed_text_id = self.canvas.create_text(windspeed_center, text="",
-                                                                font=("Arial", 20, "bold"), fill="black", anchor="center")
-        self.cloud_text_id = self.canvas.create_text(cloud_description_center, text="",
-                                                            font=("Arial", 20, "bold"), fill="black", anchor="center")
-        self.flag_label = self.canvas.create_image(flag_position_center, anchor="center")  # Create the image placeholder
+    def get_matching_cities(self, prefix):
+        # Return cities that start with the given prefix (case insensitive)
+        prefix = prefix.lower()
+        return [city for city in self.cities_list 
+               if city.get("name", "").lower().startswith(prefix)]
 
     def save_search_to_json(self, city, temperature, humidity):
         try:
@@ -425,7 +466,7 @@ class WeatherApp(ctk.CTk):
             self.humidity_icon = ImageTk.PhotoImage(Image.open("images/humidity1.png"))
             self.wind_icon = ImageTk.PhotoImage(Image.open("images/windspeed1.png"))
             self.description_icon = ImageTk.PhotoImage(Image.open("images/cloud_description1.png"))
-            self.big_temp_icon = ImageTk.PhotoImage(Image.open("images/bigtemp.png"))
+            self.big_temp_icon = ImageTk.PhotoImage(Image.open("images/bigtemp2.png"))
             self.lonlat_icon = ImageTk.PhotoImage(Image.open("images/lon_lat.png"))
             self.date_icon = ImageTk.PhotoImage(Image.open("images/date.png"))
             self.time_icon = ImageTk.PhotoImage(Image.open("images/time.png"))
@@ -435,10 +476,10 @@ class WeatherApp(ctk.CTk):
             self.humidity_img_id = self.canvas.create_image(160,585, anchor="w", image=self.humidity_icon)
             self.wind_img_id = self.canvas.create_image(750, 585, anchor="w", image=self.wind_icon)
             self.description_img_id = self.canvas.create_image(1050, 585, anchor="w", image=self.description_icon)
-            self.big_temp_img_id = self.canvas.create_image(1075, 315, anchor="w", image=self.big_temp_icon)
+            self.big_temp_img_id = self.canvas.create_image(1090, 315, anchor="w", image=self.big_temp_icon)
             self.lonlat_img_id  = self.canvas.create_image(1110, 212, anchor="w", image=self.lonlat_icon)
-            self.date_img_id  = self.canvas.create_image(50, 200, anchor="w", image=self.date_icon)
-            self.time_img_id  = self.canvas.create_image(50, 110, anchor="w", image=self.time_icon)
+            self.date_img_id  = self.canvas.create_image(40, 200, anchor="w", image=self.date_icon)
+            self.time_img_id  = self.canvas.create_image(40, 110, anchor="w", image=self.time_icon)
 
             self.save_search_to_json(city, temperature, humidity)
             
@@ -520,7 +561,7 @@ class WeatherApp(ctk.CTk):
             CTkMessagebox(title="Error", message=f"API Request Failed: Check internet connection", icon="cancel", sound=True)
 
     def start_spinner(self):
-        """Start the spinning dots animation."""
+        # Start the spinning dots animation
         self.spinner_active = True
         self.spinner_dots = []
         self.spinner_angle = 0
@@ -546,7 +587,7 @@ class WeatherApp(ctk.CTk):
         self.animate_spinner()
 
     def animate_spinner(self):
-        """Animate the spinning dots."""
+        #Animate the spinning dots
         if not self.spinner_active:
             return
 
@@ -564,7 +605,7 @@ class WeatherApp(ctk.CTk):
         self.after(50, self.animate_spinner)
 
     def stop_spinner(self):
-        """Stop the spinning dots animation."""
+        #Stop the spinning dots animation
         self.spinner_active = False
         for dot in self.spinner_dots:
             self.canvas.delete(dot)
