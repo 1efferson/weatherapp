@@ -67,12 +67,8 @@ class WeatherApp(ctk.CTk):
             with open("cities.json", "r", encoding="utf-8") as file:
                 self.cities_list = json.load(file)
             print(f"Successfully loaded {len(self.cities_list)} cities")
-        except FileNotFoundError:
-            print("Error: cities.json file not found")
-        except json.JSONDecodeError:
-            print("Error: Invalid JSON format in cities.json")
         except Exception as e:
-            print(f"Unexpected error loading cities: {e}")
+            print(f"Unexpected error loading cities")
 
     def initialize_Graphical_Interface(self):
        # Creating a frame for the searchbar to put the two images inside of it.
@@ -129,8 +125,8 @@ class WeatherApp(ctk.CTk):
                                             command=self.getweather)
         self.search_button.pack(side="right", padx=5, pady=5)
 
-        history_button = ctk.CTkButton(self,image=self.history_image,text="",fg_color="transparent", width=20,height=20,command=self.history_toplevel)
-        history_button.place(relx=0.9, rely=0.09)   
+        search_history_button = ctk.CTkButton(self,image=self.history_image,text="",fg_color="transparent", width=20,height=20,command=self.history_toplevel)
+        search_history_button.place(relx=0.9, rely=0.09)   
 
         # Create canvas text items
         self.big_temp_text_id = self.canvas.create_text(1275, 315, text="",font=("Arial", 70, "bold"), fill="black", anchor="center")
@@ -141,7 +137,7 @@ class WeatherApp(ctk.CTk):
 
         self.time_text_id = self.canvas.create_text(225, 108, text="",font=("Arial", 50, "bold"), fill="black", anchor="center")
 
-        self.day_text_id = self.canvas.create_text(160, 189, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
+        self.day_text_id = self.canvas.create_text(180, 189, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
         self.date_text_id = self.canvas.create_text(180, 216, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
@@ -186,13 +182,6 @@ class WeatherApp(ctk.CTk):
         self.search_entry.insert(0, city_name)
         self.suggestion_menu.pack_forget()
         self.getweather()  # Fetch weather for selected city
-
-
-    def get_matching_cities(self, prefix):
-        # Return cities that start with the given prefix (case insensitive)
-        prefix = prefix.lower()
-        return [city for city in self.cities_list 
-               if city.get("name", "").lower().startswith(prefix)]
 
     def save_search_to_json(self, city, temperature, humidity):
         try:
@@ -528,7 +517,7 @@ class WeatherApp(ctk.CTk):
             # Handle other API request errors
             CTkMessagebox(
                 title="Error",
-                message=f"API Request Failed: Check spelling",
+                message=f"API Request Failed: City might not be pressent in API database or Check spelling",
                 icon="cancel",
                 sound=True,
                 bg_color="white",
