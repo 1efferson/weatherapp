@@ -327,7 +327,7 @@ class WeatherApp(ctk.CTk):
             return
 
         # Start the spinner
-        self.start_spinner()
+        self.start_spinner()  
 
         # Start the weather fetching process in a separate thread
         threading.Thread(target=self.fetch_weather_data, args=(city,), daemon=True).start()
