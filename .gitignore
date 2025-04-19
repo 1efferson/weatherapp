@@ -1,3 +1,4 @@
 .env
 search_history.json
 .venv
+__pycache__

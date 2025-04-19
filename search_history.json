@@ -1,1 +1,38 @@
-[]
+[
+    {
+        "city": "Assenede",
+        "temperature": 13.2,
+        "humidity": 53,
+        "datetime": "2025-04-18 19:20:29"
+    },
+    {
+        "city": "accra",
+        "temperature": 29.23,
+        "humidity": 79,
+        "datetime": "2025-04-18 19:25:02"
+    },
+    {
+        "city": "Accra",
+        "temperature": 31.23,
+        "humidity": 70,
+        "datetime": "2025-04-19 12:17:30"
+    },
+    {
+        "city": "Accra",
+        "temperature": 31.23,
+        "humidity": 70,
+        "datetime": "2025-04-19 12:31:32"
+    },
+    {
+        "city": "Achau",
+        "temperature": 18.44,
+        "humidity": 62,
+        "datetime": "2025-04-19 12:35:26"
+    },
+    {
+        "city": "Accra",
+        "temperature": 32.23,
+        "humidity": 66,
+        "datetime": "2025-04-19 14:40:04"
+    }
+]

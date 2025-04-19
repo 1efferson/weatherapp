@@ -153,35 +153,63 @@ class WeatherApp(ctk.CTk):
 
         self.flag_label = self.canvas.create_image(1230, 94, anchor="center")
 
+    # the update_suggestions method
     def update_suggestions(self, event):
-        #Update city suggestions dropdown based on user input
         current_text = self.search_entry.get().strip()
 
-        if len(current_text) < 1:  # Hide dropdown if input is empty
+        if len(current_text) < 1:
             self.suggestion_menu.pack_forget()
             return
 
         matching_cities = [
             city for city in self.cities_list 
-            if city.get("name", "").capitalize().startswith(current_text.capitalize())][:] #all city suggestions available
+            if city.get("name", "").capitalize().startswith(current_text.capitalize())
+        ]
 
-        if matching_cities:
-            self.suggestion_menu.configure(
-                values=[f"{city['name']}, {city.get('country', '')}" for city in matching_cities]
-            )
-            self.suggestion_menu.pack(side="left", fill="x", expand=True)  # Ensure dropdown appears
+        values = []
+        for city in matching_cities:
+            country_code = city.get("country", "")
+            flag_emoji = self.get_flag_emoji(country_code)
+            try:
+                country = pycountry.countries.get(alpha_2=country_code)
+                country_name = country.name
+            except AttributeError:
+                country_name = country_code
+            display_text = f"{flag_emoji} {city['name']}, {country_name}"
+            values.append(display_text)
+
+        if values:
+            self.suggestion_menu.configure(values=values)
+            self.suggestion_menu.pack(side="left", fill="x", expand=True)
         else:
             self.suggestion_menu.pack_forget()
 
+    # method to convert country code to flag emoji
+    def get_flag_emoji(self, country_code):
+        if len(country_code) != 2:
+            return ""
+        code = country_code.upper()
+        if not (code[0].isalpha() and code[1].isalpha()):
+            return ""
+        first = 0x1F1E6 + (ord(code[0]) - ord('A'))
+        second = 0x1F1E6 + (ord(code[1]) - ord('A'))
+        return chr(first) + chr(second)
 
-
+    # Update the select_city method
     def select_city(self, choice):
-        # Handle city selection from dropdown
-        city_name = choice.split(",")[0].strip()
+        try:
+            # Split into parts and extract city name
+            parts = choice.split(', ', 1)
+            left_part = parts[0]
+            city_name = ' '.join(left_part.split(' ')[1:]).strip()
+        except:
+            city_name = choice.split(",")[0].strip()
+        
         self.search_entry.delete(0, "end")
         self.search_entry.insert(0, city_name)
         self.suggestion_menu.pack_forget()
-        self.getweather()  # Fetch weather for selected city
+        self.getweather()
+
 
     def save_search_to_json(self, city, temperature, humidity):
         try:
