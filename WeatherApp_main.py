@@ -20,6 +20,9 @@ from urllib3.exceptions import MaxRetryError, NameResolutionError
 from dotenv import load_dotenv
 import os
 import json
+import speech_recognition as sr
+from tkintermapview import TkinterMapView
+
 
 
 
@@ -54,6 +57,12 @@ class WeatherApp(ctk.CTk):
 
         # Initialize the rest of the UI components (frames, searchbar, etc.)
         self.initialize_Graphical_Interface()
+       
+        # map variables
+        self.map_visible = False
+        self.initialize_weather_map()
+        self.map_frame.place_forget()
+
 
         # Spinner variables
         self.spinner_dots = []
@@ -113,6 +122,16 @@ class WeatherApp(ctk.CTk):
         self.suggestion_menu.set("")
         self.suggestion_menu.pack_forget()
 
+        self.voice_button = ctk.CTkButton(self, text="🎤", command=self.voice_input, width = 50, height = 45, fg_color="transparent", hover_color="lightgrey")
+        self.voice_button.place(relx=0.66, rely=0.10)
+        
+        self.output_text_id = self.canvas.create_text( 750, 70, text="", font=("Arial", 14), fill="black", anchor="center")
+
+
+        # self.output_label = ctk.CTkLabel(self, text="", text_color="black", font=("Arial", 14),)
+        # self.output_label.place(relx=0.45, rely=0.06)
+
+
         # Bind the Enter key on the search entry to trigger the getweather method.
         self.search_entry.bind("<Return>", self.getweather)
 
@@ -125,8 +144,13 @@ class WeatherApp(ctk.CTk):
                                             command=self.getweather)
         self.search_button.pack(side="right", padx=5, pady=5)
 
-        search_history_button = ctk.CTkButton(self,image=self.history_image,text="",fg_color="transparent", width=20,height=20,command=self.history_toplevel)
-        search_history_button.place(relx=0.9, rely=0.09)   
+        search_history_button = ctk.CTkButton(self,image=self.history_image,text="",fg_color="transparent",hover_color="lightgrey", width=50,height=45,command=self.history_toplevel)
+        search_history_button.place(relx=0.94, rely=0.05) 
+
+
+        # Add map toggle button
+        self.map_button = ctk.CTkButton(self, text="🌍 Show Map", text_color="black", command=self.toggle_map, width=100, height=40,fg_color="transparent",hover_color="lightgrey")
+        self.map_button.place(relx=0.01, rely=0.04)  
 
         # Create canvas text items
         self.big_temp_text_id = self.canvas.create_text(1275, 315, text="",font=("Arial", 70, "bold"), fill="black", anchor="center")
@@ -627,6 +651,123 @@ class WeatherApp(ctk.CTk):
         for dot in self.spinner_dots:
             self.canvas.delete(dot)
         self.spinner_dots = []
+
+       # SPEECH RECOGNITION FUNCTION
+    def recognize_speech(self):
+        recognizer = sr.Recognizer()
+        try:
+            with sr.Microphone() as source:
+                self.canvas.itemconfig(self.output_text_id,text="Listening...")
+                # self.output_label.configure(text="Listening...")
+                self.update()  # Force GUI update before blocking
+
+                recognizer.adjust_for_ambient_noise(source)
+                audio = recognizer.listen(source)
+
+            self.canvas.itemconfig(self.output_text_id,text="Recognizing...")
+            self.update()  # Force GUI update before blocking
+
+            # self.output_label.configure(text="Recognizing...")
+            text = recognizer.recognize_google(audio)
+            # print("You said:", text)
+            return text
+
+        except sr.UnknownValueError:
+            return "Sorry, I couldn't understand."
+        except sr.RequestError:
+            return "API unavailable or network issue."
+
+    def voice_input(self):
+        self.canvas.itemconfig(self.output_text_id,text="Processing voice input...")
+        # self.output_label.configure(text="Processing voice input...")
+        result = self.recognize_speech()
+
+        if "Sorry" not in result and "API" not in result:
+            self.search_entry.delete(0, "end")
+            self.search_entry.insert(0, result)
+            self.getweather()
+            self.canvas.itemconfig(self.output_text_id, text=f"Voice input: {result}")
+
+            # self.output_label.configure(text=f"Voice input: {result}")
+        else:
+            # self.output_label.configure(text=result)
+            self.canvas.itemconfig(self.output_text_id, text=result)
+
+    def initialize_weather_map(self):
+        # Create frame for the map
+        self.map_frame = ctk.CTkFrame(self, fg_color="white", corner_radius=10)
+        # self.map_frame.place(relx=0.01, rely=0.25, relwidth=0.4, relheight=0.5)
+
+        # Create the map widget
+        self.map_widget = TkinterMapView(self.map_frame, width=600, height=400, corner_radius=10)
+        self.map_widget.pack(fill="both", expand=True, padx=5, pady=5)
+
+        # Set default position (Accra, Ghana) and zoom level
+        self.map_widget.set_position(5.6037, -0.1870)
+        self.map_widget.set_zoom(10)  # More reasonable zoom level for city view
+
+        # Add right-click menu to search weather at clicked location
+        self.map_widget.add_right_click_menu_command(
+            label="Search Weather Here",
+            command=self.map_click_callback,
+            pass_coords=True
+        )
+
+        # Add marker for current location
+        self.current_marker = None
+
+    def map_click_callback(self, coords):
+        lat, lon = coords
+        
+        # Clear previous marker
+        if self.current_marker:
+            self.map_widget.delete(self.current_marker)
+        
+        # Add new marker
+        self.current_marker = self.map_widget.set_marker(lat, lon)
+        self.map_widget.set_position(lat, lon)
+        
+        # OpenWeather Reverse Geocoding API (1 call = 1 API credit)
+        OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")  # Same key as weather API
+        url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={OPENWEATHER_API_KEY}"
+        
+        try:
+            response = requests.get(url)
+            data = response.json()
+            
+            if data and isinstance(data, list):
+                city = data[0].get("name", "Unknown")
+                country = data[0].get("country", "")
+                
+                print(f"OpenWeather Geocoding Result: {city}, {country}")
+                
+                self.search_entry.delete(0, "end")
+                self.search_entry.insert(0, city)
+                self.getweather()
+            else:
+                CTkMessagebox(
+                    title="Error",
+                    message="No location data found for these coordinates.",
+                    icon="warning"
+                )
+        
+        except Exception as e:
+            print(f"OpenWeather Geocoding Error: {str(e)}")
+            CTkMessagebox(
+                title="Error",
+                message=f"Geocoding failed: {str(e)}",
+                icon="cancel"
+            )
+
+    def toggle_map(self):
+        if self.map_visible:
+            self.map_frame.place_forget()
+            self.map_button.configure(text="🌍 Show Map")
+        else:
+            self.map_frame.place(relx=0.01, rely=0.25, relwidth=0.4, relheight=0.5, )
+            self.map_button.configure(text="🗺️ Hide Map")
+        
+        self.map_visible = not self.map_visible
 
         
 if __name__ == "__main__":
