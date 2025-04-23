@@ -37,6 +37,11 @@ class WeatherApp(ctk.CTk):
         self.geometry("1920x1000")
         self.title("WEATHER FORECAST APPLICATION")
 
+                # API Key
+        load_dotenv()  # Load environment variables from .env file
+        self.API_KEY = os.getenv("OPENWEATHER_API_KEY")
+
+
         # Set minimum and maximum window size
         self.minsize(800, 600)
         self.maxsize(1500, 900)
@@ -448,13 +453,9 @@ class WeatherApp(ctk.CTk):
         else:
             current_time = "Timezone not found"
 
-        # API Key
-        load_dotenv()  # Load environment variables from .env file
-        API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-
-        api_url_current = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
-        api_url_forecast = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric"
+        api_url_current = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={self.API_KEY}&units=metric"
+        api_url_forecast = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={self.API_KEY}&units=metric"
         FLAG_URL = "https://flagsapi.com/{}/flat/64.png"
         
 
@@ -728,8 +729,7 @@ class WeatherApp(ctk.CTk):
         self.map_widget.set_position(lat, lon)
         
         # OpenWeather Reverse Geocoding API (1 call = 1 API credit)
-        OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")  # Same key as weather API
-        url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={OPENWEATHER_API_KEY}"
+        url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={self.API_KEY}"
         
         try:
             response = requests.get(url)
