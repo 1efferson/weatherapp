@@ -37,7 +37,7 @@ class WeatherApp(ctk.CTk):
         self.geometry("1920x1000")
         self.title("WEATHER FORECAST APPLICATION")
 
-                # API Key
+        # API Key
         load_dotenv()  # Load environment variables from .env file
         self.API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
@@ -50,14 +50,13 @@ class WeatherApp(ctk.CTk):
         self.cities_list = []  # Initialize empty list
         self.load_cities_data()  # Load cities data
 
-# 
         # Canvas for background
         self.canvas = tk.Canvas(self, width=1920, height=1000, highlightthickness=0)
         self.canvas.place(x=0, y=0, relwidth=1, relheight=1)
-# 
+
         # Load background images
-        self.day_bg = ImageTk.PhotoImage(Image.open("images/day3.jpg").resize((1920, 1000)))
-        self.night_bg = ImageTk.PhotoImage(Image.open("images/night7.jpg").resize((1920, 1000)))
+        self.day_bg = ImageTk.PhotoImage(Image.open("assets/images/day3.jpg").resize((1920, 1000)))
+        self.night_bg = ImageTk.PhotoImage(Image.open("assets/images/night7.jpg").resize((1920, 1000)))
         self.bg_photo = self.canvas.create_image(0, 0, anchor="nw", image=self.day_bg)
 
         # Initialize the rest of the UI components (frames, searchbar, etc.)
@@ -91,9 +90,9 @@ class WeatherApp(ctk.CTk):
 
 
             # Load images using CTkImage.
-        self.searchbar_cloud_image = ctk.CTkImage(light_image=Image.open("images/searchbar_cloud1.png"), size=(30, 30))
-        self.searchbar_search_image = ctk.CTkImage(light_image=Image.open("images/search_icon.png"), size=(30, 30))
-        self.history_image = ctk.CTkImage(light_image=Image.open("images/history_image2.png"), size=(30, 30))
+        self.searchbar_cloud_image = ctk.CTkImage(light_image=Image.open("assets/images/searchbar_cloud1.png"), size=(30, 30))
+        self.searchbar_search_image = ctk.CTkImage(light_image=Image.open("assets/images/search_icon.png"), size=(30, 30))
+        self.history_image = ctk.CTkImage(light_image=Image.open("assets/images/history_image2.png"), size=(30, 30))
 
             # Left-side image.
         self.left_label_in_searchbar = ctk.CTkLabel(self.searchbar_frame, image=self.searchbar_cloud_image, text="",
@@ -504,14 +503,14 @@ class WeatherApp(ctk.CTk):
             self.canvas.itemconfig(self.cloud_text_id, text=f"Clouds:\n{cloud_description.capitalize()}")
 
             # Load the images for the four weather parameters siting on frame 1
-            self.pressure_icon = ImageTk.PhotoImage(Image.open("images/pressure1.png"))
-            self.humidity_icon = ImageTk.PhotoImage(Image.open("images/humidity1.png"))
-            self.wind_icon = ImageTk.PhotoImage(Image.open("images/windspeed1.png"))
-            self.description_icon = ImageTk.PhotoImage(Image.open("images/cloud_description1.png"))
-            self.big_temp_icon = ImageTk.PhotoImage(Image.open("images/bigtemp2.png"))
-            self.lonlat_icon = ImageTk.PhotoImage(Image.open("images/lon_lat.png"))
-            self.date_icon = ImageTk.PhotoImage(Image.open("images/date.png"))
-            self.time_icon = ImageTk.PhotoImage(Image.open("images/time.png"))
+            self.pressure_icon = ImageTk.PhotoImage(Image.open("assets/images/pressure1.png"))
+            self.humidity_icon = ImageTk.PhotoImage(Image.open("assets/images/humidity1.png"))
+            self.wind_icon = ImageTk.PhotoImage(Image.open("assets/images/windspeed1.png"))
+            self.description_icon = ImageTk.PhotoImage(Image.open("assets/images/cloud_description1.png"))
+            self.big_temp_icon = ImageTk.PhotoImage(Image.open("assets/images/bigtemp2.png"))
+            self.lonlat_icon = ImageTk.PhotoImage(Image.open("assets/images/lon_lat.png"))
+            self.date_icon = ImageTk.PhotoImage(Image.open("assets/images/date.png"))
+            self.time_icon = ImageTk.PhotoImage(Image.open("assets/images/time.png"))
 
             # Create the image on canvas with specified coordinates (x, y)
             self.pressure_img_id = self.canvas.create_image(480, 585,anchor="w", image=self.pressure_icon)
@@ -551,7 +550,7 @@ class WeatherApp(ctk.CTk):
                 lbl.pack(side="top", fill="x", padx=5, pady=5)  
 
                 icon_code = json_forecast_data["list"][i]["weather"][0]["icon"]
-                icon_path = f"icon/{icon_code}@2x.png"
+                icon_path = f"assets/icon/{icon_code}@2x.png"
 
                 # Load image with PIL
                 image = Image.open(icon_path)
@@ -589,7 +588,7 @@ class WeatherApp(ctk.CTk):
             self.canvas.itemconfig(self.day_text_id, text=local_time.strftime("%A"))
             self.canvas.itemconfig(self.date_text_id, text=local_time.strftime("%d %B %Y"))
 
- # 
+
         try:
             sunrise = json_current_data["sys"]["sunrise"]
             sunset = json_current_data["sys"]["sunset"]
@@ -764,7 +763,7 @@ class WeatherApp(ctk.CTk):
             self.map_frame.place_forget()
             self.map_button.configure(text="🌍 Show Map")
         else:
-            self.map_frame.place(relx=0.01, rely=0.25, relwidth=0.4, relheight=0.5, )
+            self.map_frame.place(relx=0.2, rely=0.25, relwidth=0.5, relheight=0.3, )
             self.map_button.configure(text="🗺️ Hide Map")
         
         self.map_visible = not self.map_visible
