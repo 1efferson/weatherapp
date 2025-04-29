@@ -57,6 +57,7 @@ class WeatherApp(ctk.CTk):
         # Load background images
         self.day_bg = ImageTk.PhotoImage(Image.open("assets/images/day3.jpg").resize((1920, 1000)))
         self.night_bg = ImageTk.PhotoImage(Image.open("assets/images/night7.jpg").resize((1920, 1000)))
+        self.rain_bg = ImageTk.PhotoImage(Image.open("assets/images/rain.jpg").resize((1920, 1000)))
         self.bg_photo = self.canvas.create_image(0, 0, anchor="nw", image=self.day_bg)
 
         # Initialize the rest of the UI components (frames, searchbar, etc.)
@@ -180,6 +181,9 @@ class WeatherApp(ctk.CTk):
         self.cloud_text_id = self.canvas.create_text(1237, 585, text="",font=("Arial", 20, "bold"), fill="black", anchor="center")
 
         self.flag_label = self.canvas.create_image(1230, 94, anchor="center")
+
+        self.feels_like_text_id = self.canvas.create_text( 1275, 380, text="", font=("Arial", 24, "italic"), fill="black", anchor="center")
+
 
     # the update_suggestions method
     def update_suggestions(self, event):
@@ -349,11 +353,33 @@ class WeatherApp(ctk.CTk):
         sunset_time = datetime.fromtimestamp(sunset + timezone_offset, tz=timezone.utc)
         current_time = datetime.now(timezone.utc) + timedelta(seconds=timezone_offset)
         return sunrise_time < current_time < sunset_time
+    
+    def describe_feels_like(self, feels_like):
+        if feels_like <= 0:
+            return "Brutally cold."
+        elif feels_like <= 10:
+            return "Very cold"
+        elif feels_like<= 16:
+            return "Chilly"
+        elif feels_like <= 21:
+            return "Cool"
+        elif feels_like <= 27:
+            return " A comfortable warm day"
+        elif feels_like<= 32:
+            return "Warm"
+        elif feels_like<= 38:
+            return "Getting COOKED"
+        else:
+            return "Scorching"
 
 
-    def update_background(self, is_day):
-        # Update the background image based on day or night.
-        new_bg = self.day_bg if is_day else self.night_bg
+
+    def update_background(self, is_day, is_rain):
+        # Update the background image based on day, night, or rain.
+        if is_rain:
+            new_bg = self.rain_bg
+        else:
+            new_bg = self.day_bg if is_day else self.night_bg
         self.canvas.itemconfig(self.bg_photo, image=new_bg)
 
 
@@ -492,6 +518,11 @@ class WeatherApp(ctk.CTk):
             pressure = json_current_data["main"]["pressure"]
             windspeed = json_current_data["wind"]["speed"]
             cloud_description = json_current_data["weather"][0]["description"]
+            
+            # description of how the weather might feel like
+            feels_like = json_current_data["main"]["feels_like"]
+            desc = self.describe_feels_like(feels_like)
+            
             country=country
 
             # Update canvas text items with new weather data.
@@ -501,6 +532,7 @@ class WeatherApp(ctk.CTk):
             self.canvas.itemconfig(self.pressure_text_id, text=f"Pressure:\n{pressure} hPa")
             self.canvas.itemconfig(self.windspeed_text_id, text=f"Windspeed:\n{windspeed} m/s")
             self.canvas.itemconfig(self.cloud_text_id, text=f"Clouds:\n{cloud_description.capitalize()}")
+            self.canvas.itemconfig(self.feels_like_text_id, text=f"Feels like: {feels_like:.1f}°C — {desc}")
 
             # Load the images for the four weather parameters siting on frame 1
             self.pressure_icon = ImageTk.PhotoImage(Image.open("assets/images/pressure1.png"))
@@ -524,7 +556,6 @@ class WeatherApp(ctk.CTk):
 
             self.save_search_to_json(city, temperature, humidity)
             
-
             # If history window exists, update it
             if hasattr(self, "history_window") and self.history_window.winfo_exists():
                 self.update_history_window()
@@ -594,8 +625,19 @@ class WeatherApp(ctk.CTk):
             sunset = json_current_data["sys"]["sunset"]
             timezone_offset = json_current_data["timezone"]
 
+            # Check if rain data is present
+            
+            rain_data = json_current_data.get("rain")  # Use .get() to avoid crash
+            is_rain = rain_data is not None
+
+            if is_rain:
+                print(f"Rain expected: {rain_data} millimeters")
+            else:
+                print("No rain data available.")
+
+
             is_day = self.is_daytime(sunrise, sunset, timezone_offset)
-            self.update_background(is_day)  # Update the background image (day or night)
+            self.update_background(is_day,is_rain)  # Update the background image (day or night)
             self.toggle_mode(is_day)  # Update text colors based on day/night
 
         except requests.exceptions.RequestException as e:
