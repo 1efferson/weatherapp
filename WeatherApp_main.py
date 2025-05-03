@@ -1,31 +1,20 @@
 import tkinter as tk
 import customtkinter as ctk
-from geopy.geocoders import Nominatim
 from CTkMessagebox import CTkMessagebox
-from timezonefinder import TimezoneFinder
 from datetime import datetime
 import requests
-import pytz
-import certifi
-import ssl
 from PIL import Image, ImageTk
 import threading
 import math
 import pycountry
-from io import BytesIO
-from datetime import datetime,timedelta,timezone
-from geopy.exc import GeocoderUnavailable
-from requests.exceptions import RequestException, ConnectionError
-from urllib3.exceptions import MaxRetryError, NameResolutionError
+from datetime import datetime
 from dotenv import load_dotenv
 import os
 import json
 from tkintermapview import TkinterMapView
 from history_manager import HistoryManager
 from voice_recognition import VoiceRecognition
-
-
-
+from weather_fetcher import WeatherFetcher
 
 
 # Set dark theme
@@ -36,29 +25,24 @@ ctk.set_default_color_theme("blue")  # You can try other themes like "blue" or "
 class WeatherApp(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.geometry("1920x1000")
+        self.geometry("1500x900")
         self.title("WEATHER FORECAST APPLICATION")
+
+        # Canvas for background
+        self.canvas = tk.Canvas(self, width=1500, height=900, highlightthickness=0)
+        self.canvas.place(x=0, y=0, relwidth=1, relheight=1)
 
         # API Key
         load_dotenv()  # Load environment variables from .env file
         self.API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-
-        # Set minimum and maximum window size
-        self.minsize(800, 600)
-        self.maxsize(1500, 900)
-
-         # Initialize cities data
+        # Initialize cities data
         self.cities_list = []  # Initialize empty list
         self.load_cities_data()  # Load cities data
         self.voice_recognizer = None
 
         self.history_manager = HistoryManager(self)
         self.voice_recognizer = VoiceRecognition(self.voice_callback)
-
-        # Canvas for background
-        self.canvas = tk.Canvas(self, width=1920, height=1000, highlightthickness=0)
-        self.canvas.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Load background images
         self.day_bg = ImageTk.PhotoImage(Image.open("assets/images/day3.jpg").resize((1920, 1000)))
@@ -106,7 +90,7 @@ class WeatherApp(ctk.CTk):
                                                         fg_color="transparent")
         self.left_label_in_searchbar.pack(side="left", padx=5, pady=5)
 
-            # Add an entry box to the search bar.
+            # entry box to the search bar.
         self.search_entry = ctk.CTkEntry(self.searchbar_frame, 
                                        font=("Arial", 16), 
                                        text_color="black",
@@ -136,7 +120,7 @@ class WeatherApp(ctk.CTk):
         self.voice_button = ctk.CTkButton(self, text="🎤", command=self.handle_voice_input, width = 50, height = 45, fg_color="transparent", hover_color="lightgrey")
         self.voice_button.place(relx=0.66, rely=0.10)
         
-        self.output_text_id = self.canvas.create_text( 750, 70, text="", font=("Arial", 14), fill="black", anchor="center")
+        self.voice_output_text_id = self.canvas.create_text( 750, 70, text="", font=("Arial", 14), fill="black", anchor="center")
 
 
         # Bind the Enter key on the search entry to trigger the getweather method.
@@ -188,13 +172,13 @@ class WeatherApp(ctk.CTk):
 
     def voice_callback(self, message: str):
         """Handle voice recognition status updates"""
-        self.canvas.itemconfig(self.output_text_id, text=message)
+        self.canvas.itemconfig(self.voice_output_text_id, text=message)
         self.update()  # Force UI update
 
     def handle_voice_input(self):
         """Handle voice button click"""
         if not self.voice_recognizer.is_listening:
-            self.canvas.itemconfig(self.output_text_id, text="Starting voice recognition...")
+            self.canvas.itemconfig(self.voice_output_text_id, text="Starting voice recognition...")
             recognized_text = self.voice_recognizer.listen()
             
             if recognized_text:
@@ -203,9 +187,9 @@ class WeatherApp(ctk.CTk):
                 self.getweather()
         else:
             self.voice_recognizer.stop_listening()
-            self.canvas.itemconfig(self.output_text_id, text="Voice recognition stopped")
+            self.canvas.itemconfig(self.voice_output_text_id, text="Voice recognition stopped")
 
-    # the update_suggestions method
+    # the update_suggestions method for the options/suggestions menu
     def update_suggestions(self, event):
         current_text = self.search_entry.get().strip()
 
@@ -261,14 +245,6 @@ class WeatherApp(ctk.CTk):
         self.search_entry.insert(0, city_name)
         self.suggestion_menu.pack_forget()
         self.getweather()
-
-            
-    def is_daytime(self, sunrise, sunset, timezone_offset):
-        # Determine if it's currently daytime based on sunrise and sunset times.
-        sunrise_time = datetime.fromtimestamp(sunrise + timezone_offset, tz=timezone.utc)
-        sunset_time = datetime.fromtimestamp(sunset + timezone_offset, tz=timezone.utc)
-        current_time = datetime.now(timezone.utc) + timedelta(seconds=timezone_offset)
-        return sunrise_time < current_time < sunset_time
     
     def describe_feels_like(self, feels_like):
         if feels_like <= 0:
@@ -287,7 +263,6 @@ class WeatherApp(ctk.CTk):
             return "Getting COOKED"
         else:
             return "Scorching"
-
 
 
     def update_background(self, is_day, is_rain):
@@ -331,118 +306,33 @@ class WeatherApp(ctk.CTk):
         threading.Thread(target=self.fetch_weather_data, args=(city,), daemon=True).start()
 
     def fetch_weather_data(self, city):
-        # Set the SSL certificate path.
-        ssl_context = ssl.create_default_context(cafile=certifi.where())
-
-        # Initialize the geolocator with the SSL context.
-        geolocator = Nominatim(user_agent="geoapiExercise", ssl_context=ssl_context)
-
-
-
         try:
-            # Attempt to fetch location data
-            location = geolocator.geocode(city)
-        except (GeocoderUnavailable, ConnectionError, MaxRetryError, NameResolutionError) as e:
-            # Handle network-related errors
-            CTkMessagebox(
-                title="Error",
-                message="No internet, check your network connection or servers might be down",
-                icon="cancel",
-                sound=True,
-                bg_color="white",
-                fg_color="lightblue",
-                border_color="lightblue"
-            )
-            self.stop_spinner()  # Stop the spinner
-            return
-        except Exception as e:
-            # Handle other unexpected errors
-            CTkMessagebox(
-                title="Error",
-                message=f"Spelling of the city might be wrong",
-                icon="cancel",
-                sound=True,
-                bg_color="white",
-                fg_color="lightblue",
-                border_color="lightblue"
-            )
-            self.stop_spinner()  # Stop the spinner
-            return
-
-        if location is None:
-            CTkMessagebox(
-                title="Error",
-                message="City not found. Please enter a valid city name.",
-                icon="cancel",
-                sound=True,
-                bg_color="white",
-                fg_color="lightblue",
-                border_color="lightblue"
-            )
-            self.stop_spinner()  # Stop the spinner if city is not found
-            return
-
-
-        timezone_finder = TimezoneFinder()
-        result = timezone_finder.timezone_at(lng=location.longitude, lat=location.latitude)
-
-        # Set the time using the fetched timezone.
-        if result:
-                time_zone = pytz.timezone(result)
-                local_time = datetime.now(time_zone)
-                current_time = local_time.strftime("%I:%M %p")
-        else:
-            current_time = "Timezone not found"
-
-
-        api_url_current = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={self.API_KEY}&units=metric"
-        api_url_forecast = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={self.API_KEY}&units=metric"
-        FLAG_URL = "https://flagsapi.com/{}/flat/64.png"
-        
-
-        try:
-            # Attempt to fetch weather data
-            response_current = requests.get(api_url_current)
-            response_current.raise_for_status()  # Raise an exception for HTTP errors
-            json_current_data = response_current.json()
-
-            country_code= json_current_data["sys"]["country"]
-            country= pycountry.countries.get(alpha_2=country_code).name
-                
-
-            flag_url = FLAG_URL.format(country_code)
-            flag_response = requests.get(flag_url)
-            if flag_response.status_code == 200:
-                img_data = BytesIO(flag_response.content)
-                img = Image.open(img_data)
-                img = img.resize((50, 48))
-
-                # Resize flag
-                self.flag_img = ImageTk.PhotoImage(img)
-                self.canvas.itemconfig(self.flag_label, image=self.flag_img)
-            else:
-                self.flag_label.config(image="")
-
-
-            response_forecast = requests.get(api_url_forecast)
-            response_forecast.raise_for_status()  # Raise an exception for HTTP errors
-            json_forecast_data = response_forecast.json() 
-
-            # Update weather dataderfgtdsf
-            temperature = json_current_data["main"]["temp"]
-            humidity = json_current_data["main"]["humidity"]
-            pressure = json_current_data["main"]["pressure"]
-            windspeed = json_current_data["wind"]["speed"]
-            cloud_description = json_current_data["weather"][0]["description"]
+            # Initialize weather fetcher
+            weather_fetcher = WeatherFetcher()
+            
+            # Fetch all weather data
+            weather_data = weather_fetcher.fetch_weather_data(city)
+            
+            # Extract data from the response
+            location = weather_data['location']
+            timezone_info = weather_data['timezone_info']
+            current_data = weather_data['current_data']
+            forecast_data = weather_data['forecast_data']
+            country = weather_data['country']
+            flag_img = weather_data['flag_img']
+            
+            # Update UI with the fetched data
+            temperature = current_data["main"]["temp"]
+            humidity = current_data["main"]["humidity"]
+            pressure = current_data["main"]["pressure"]
+            windspeed = current_data["wind"]["speed"]
+            cloud_description = current_data["weather"][0]["description"]
             
             # description of how the weather might feel like
-            feels_like = json_current_data["main"]["feels_like"]
+            feels_like = current_data["main"]["feels_like"]
             desc = self.describe_feels_like(feels_like)
             
-            country=country
-
-            # Update canvas text items with new weather data.
-
+            # Update canvas text items with new weather data
             self.canvas.itemconfig(self.big_temp_text_id, text=f"{temperature}°C")
             self.canvas.itemconfig(self.humidity_text_id, text=f"Humidity:\n{humidity}%")
             self.canvas.itemconfig(self.pressure_text_id, text=f"Pressure:\n{pressure} hPa")
@@ -479,24 +369,24 @@ class WeatherApp(ctk.CTk):
             # Update forecast data
             self.frame1 = ctk.CTkScrollableFrame(self, fg_color="#fff",
                                                 orientation="horizontal")
-            self.frame1.place(relwidth=0.84, relheight=0.25, relx=0.5, rely=1.0, anchor="s")
+            self.frame1.place(relwidth=0.84, relheight=0.25, relx=0.5, rely=0.98, anchor="s")
 
             for i in range(7):
                 frame = ctk.CTkFrame(self.frame1, fg_color="lightblue")
                 frame.pack(side="left", pady=10, padx=10, anchor="w")
 
                 # Given date-time string
-                date_str = json_forecast_data["list"][i]["dt_txt"]
+                date_str = forecast_data["list"][i]["dt_txt"]
                 datetime_object = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
                 formatted_date = datetime_object.strftime("%a %I:%M %p")
-                tmp = json_forecast_data["list"][i]["main"]["temp"]
+                tmp = forecast_data["list"][i]["main"]["temp"]
 
                 # Placing labels at the top of frame1
                 lbl = ctk.CTkLabel(frame, text=formatted_date, width=120, height=50, font=("Arial", 16, "bold"),
                                 text_color="white", fg_color="black", corner_radius=20)
                 lbl.pack(side="top", fill="x", padx=5, pady=5)  
 
-                icon_code = json_forecast_data["list"][i]["weather"][0]["icon"]
+                icon_code = forecast_data["list"][i]["weather"][0]["icon"]
                 icon_path = f"assets/icon/{icon_code}@2x.png"
 
                 # Load image with PIL
@@ -512,11 +402,38 @@ class WeatherApp(ctk.CTk):
                                                         font=("Arial", 16, "bold"))
                 temperatures_in_frame1_lbl.pack(side="right", pady=5)  # Placing labels at the top of frame1
 
-        except RequestException as e:
-            # Handle other API request errors
+            # Update canvas text(geopy) items for location and time.
+            self.canvas.itemconfig(self.country_id, text=f"{country}")
+            self.canvas.itemconfig(self.city_name_id, text=f"{city}".capitalize())
+
+            self.canvas.itemconfig(self.lonlat_text_id, text=f"{round(location.longitude, 2)}°E,{round(location.latitude, 2)}°N")
+            self.canvas.itemconfig(self.time_text_id, text=f"{timezone_info['current_time']}")
+            self.canvas.itemconfig(self.day_text_id, text=timezone_info['day'])
+            self.canvas.itemconfig(self.date_text_id, text=timezone_info['date'])
+
+            # Set flag image if available
+            if flag_img:
+                self.flag_img = ImageTk.PhotoImage(flag_img)
+                self.canvas.itemconfig(self.flag_label, image=self.flag_img)
+            else:
+                self.canvas.itemconfig(self.flag_label, image="")
+
+            # Check day/night and rain conditions
+            sunrise = current_data["sys"]["sunrise"]
+            sunset = current_data["sys"]["sunset"]
+            timezone_offset = current_data["timezone"]
+            
+            rain_data = current_data.get("rain")  # Use .get() to avoid crash
+            is_rain = rain_data is not None
+
+            is_day = weather_fetcher.is_daytime(sunrise, sunset, timezone_offset)
+            self.update_background(is_day, is_rain)  # Update the background image (day or night)
+            self.toggle_mode(is_day)  # Update text colors based on day/night
+
+        except Exception as e:
             CTkMessagebox(
                 title="Error",
-                message=f"API Request Failed: City might not be pressent in API database or Check spelling",
+                message=f"Error fetching weather data: {str(e)}",
                 icon="cancel",
                 sound=True,
                 bg_color="white",
@@ -525,40 +442,7 @@ class WeatherApp(ctk.CTk):
             )
         finally:
             self.stop_spinner()  # Stop the spinner after fetching data or if an error occurs
-
-            # Update canvas text(geopy) items for location and time.
-            self.canvas.itemconfig(self.country_id, text=f"{country}")
-            self.canvas.itemconfig(self.city_name_id, text=f"{city}".capitalize())
-
-            self.canvas.itemconfig(self.lonlat_text_id, text=f"{round(location.longitude, 2)}°E,{round(location.latitude, 2)}°N")
-            self.canvas.itemconfig(self.time_text_id, text=f"{current_time}")
-            self.canvas.itemconfig(self.day_text_id, text=local_time.strftime("%A"))
-            self.canvas.itemconfig(self.date_text_id, text=local_time.strftime("%d %B %Y"))
-
-
-        try:
-            sunrise = json_current_data["sys"]["sunrise"]
-            sunset = json_current_data["sys"]["sunset"]
-            timezone_offset = json_current_data["timezone"]
-
-            # Check if rain data is present
-            
-            rain_data = json_current_data.get("rain")  # Use .get() to avoid crash
-            is_rain = rain_data is not None
-
-            if is_rain:
-                print(f"Rain expected: {rain_data} millimeters")
-            else:
-                print("No rain data available.")
-
-
-            is_day = self.is_daytime(sunrise, sunset, timezone_offset)
-            self.update_background(is_day,is_rain)  # Update the background image (day or night)
-            self.toggle_mode(is_day)  # Update text colors based on day/night
-
-        except requests.exceptions.RequestException as e:
-            CTkMessagebox(title="Error", message=f"API Request Failed: Check internet connection", icon="cancel", sound=True)
-
+        
     def start_spinner(self):
         # Start the spinning dots animation
         self.spinner_active = True
@@ -644,7 +528,7 @@ class WeatherApp(ctk.CTk):
         self.current_marker = self.map_widget.set_marker(lat, lon)
         self.map_widget.set_position(lat, lon)
         
-        # OpenWeather Reverse Geocoding API (1 call = 1 API credit)
+        # OpenWeather Reverse Geocoding API
         url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={self.API_KEY}"
         
         try:

@@ -3,23 +3,18 @@ from typing import Callable, Optional
 
 class VoiceRecognition:
     def __init__(self, callback: Callable[[str], None]):
-        """
-        Initialize voice recognition system.
-        
-        Args:
-            callback: Function to call with recognized text
-        """
+    
+        # Initialize voice recognition system.callback: Function to call with recognized text
         self.recognizer = sr.Recognizer()
         self.callback = callback
         self.is_listening = False
 
     def listen(self) -> Optional[str]:
-        """
-        Listen to microphone input and attempt speech recognition.
-        
-        Returns:
-            str: Recognized text if successful, None otherwise
-        """
+      
+        # Listen to microphone input and attempt speech recognition.
+        # Returns:
+        #     str: Recognized text if successful, None otherwise
+       
         self.is_listening = True
         try:
             with sr.Microphone() as source:
@@ -49,5 +44,5 @@ class VoiceRecognition:
         return None
 
     def stop_listening(self):
-        """Stop any active listening operation"""
+        # Stop any active listening operation
         self.is_listening = False
