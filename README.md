@@ -1,61 +1,63 @@
 🌦️ Weather Forecast App
-A sleek and modern desktop weather forecasting application built using Python, CustomTkinter, and external APIs like OpenWeatherMap, Geopy, and TimezoneFinder. 
-It allows users to search for any city and receive up-to-date weather information, with interactive features like animated weather icons and clickable map functionality.
+A sleek desktop weather app built with Python and CustomTkinter, fetching real-time data from OpenWeatherMap, Geopy, and TimezoneFinder. 
+Features interactive maps, animated icons, and city search with auto-suggestions.
 
-##################################################################################################
+🚀 Key Features
+🔍 Search by city with auto-suggestions
 
-🚀 Features
-Search weather by city name
+📊 Current weather: Temperature, humidity, wind speed, and conditions
 
-Auto-suggestions while typing
+🗺️ Interactive map (via tkintermapview)
 
-Current weather info: temperature, humidity, wind speed, weather condition
+🌈 Lottie animations for dynamic weather icons
 
-Interactive map integration (via tkintermapview)
+⏰ Real-time timezone and location handling
 
-Lottie animations for weather icons
+📜 Search history tracking
 
-Search history tracking
-
-Real-time timezone and location handling
-
-##################################################################################################
-
-🧰 Tech Stack
+🛠️ Tech Stack
 Language: Python 3.x
 
-GUI: CustomTkinter
+GUI: CustomTkinter (modern UI)
 
 APIs:
 
-OpenWeatherMap API
+  ...OpenWeatherMap (weather data)
 
-Geopy for geocoding
+  ...Geopy (geocoding)
 
-TimezoneFinder
+ ...TimezoneFinder (timezone detection)
 
-Map View: tkintermapview
+Map: tkintermapview (interactive maps)
 
 Animations: Lottie JSON files
 
-##################################################################################################
-
-🔧 Installation
-Clone the repository:
+⚙️ Installation
+1. Clone the repository
+bash
 git clone https://github.com/1efferson/weatherapp.git
+cd weatherapp
+2. Set up the virtual environment
 
- Activate the virtual environment
 Windows:
 venv\Scripts\activate
 
 macOS/Linux:
 source venv/bin/activate
 
-Install dependencies:
+3. Install dependencies
+bash
 pip install -r requirements.txt
 
-Run the app:
+4. Restart VSCode (Critical!)
+🚨 Before launching the app, restart VSCode to ensure all dependencies and environment paths are loaded correctly.
+
+5. Run the app
+bash
 python WeatherApp_main.py
 
+❓ Troubleshooting
+If the app crashes or dependencies aren’t detected, restart VSCode and re-activate the virtual environment.
 
+Ensure your API keys (OpenWeatherMap) are properly configured in the app.
 
