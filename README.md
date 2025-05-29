@@ -22,7 +22,7 @@ GUI: CustomTkinter (modern UI)
 
 APIs:
 
-  ...OpenWeatherMap (weather data)
+  ...OpenWeatherMap (weather data).....get your api key from OpenWeatherMap and save in a .env file
 
   ...Geopy (geocoding)
 
