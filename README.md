@@ -42,7 +42,7 @@ cd weatherapp</code></pre>
     <pre><code># Windows
 venv\Scripts\activate
 
-# macOS/Linux
+<pre><code># macOS/Linux
 source venv/bin/activate</code></pre>
   </li>
   <li>Install dependencies:
