@@ -61,3 +61,7 @@ If the app crashes or dependencies aren’t detected, restart VSCode and re-acti
 
 Ensure your API keys (OpenWeatherMap) are properly configured in the app.
 
+
+
+A view of the APP.......![Audio Recognition](Assets/images/Audio_recognition_feature.png)
+
