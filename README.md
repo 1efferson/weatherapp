@@ -39,11 +39,14 @@
 cd weatherapp</code></pre>
   </li>
   <li>Set up the virtual environment:
-    <pre><code><em># Windows <em/>
+
+  <pre><code> # macOS/Linux
+source venv/bin/activate</code></pre>
+
+  <pre><code># Window
 venv\Scripts\activate
 
-  <pre><code> <em># macOS/Linux <em/>
-source venv/bin/activate</code></pre>
+ 
   </li>
   <li>Install dependencies:
     <pre><code>pip install -r requirements.txt</code></pre>
@@ -59,6 +62,27 @@ source venv/bin/activate</code></pre>
   <li>If the app crashes or dependencies aren’t detected, restart VSCode and re-activate the virtual environment.</li>
   <li>Ensure your API keys (OpenWeatherMap) are properly configured in the app.</li>
 </ul>
+
+
+
+<h2>📌 Known Issue</h2>
+
+<div style="background-color: #fff3cd; border-left: 6px solid #ffecb5; padding: 12px; margin-bottom: 20px;">
+  <p><strong>⚠️ Background Image Responsiveness on Windows</strong></p>
+  <p>Currently, the app's background image does <strong>not resize correctly on Windows</strong> systems. This is a known issue and is actively being worked on to ensure full cross-platform compatibility.</p>
+</div>
+
+<h2>🤝 Contribute & Collaborate</h2>
+
+<p>I welcome contributions and collaborations! If you're interested in improving or extending the app:</p>
+
+<ul>
+  <li>🍴 <strong>Fork</strong> the repository</li>
+  <li>📥 <strong>Open a pull request</strong> with your improvements</li>
+  <li>💬 Or simply <strong>open an issue</strong> to suggest ideas</li>
+</ul>
+
+<p><strong>Let’s build something great together!</strong> 🚀</p>
 
 
 
