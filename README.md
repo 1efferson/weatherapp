@@ -39,10 +39,10 @@
 cd weatherapp</code></pre>
   </li>
   <li>Set up the virtual environment:
-    <pre><code># Windows
+    <pre><code><em># Windows <em/>
 venv\Scripts\activate
 
-<pre><code># macOS/Linux
+  <pre><code> <em># macOS/Linux <em/>
 source venv/bin/activate</code></pre>
   </li>
   <li>Install dependencies:
