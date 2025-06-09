@@ -63,6 +63,6 @@ Ensure your API keys (OpenWeatherMap) are properly configured in the app.
 
 
 
-A view of the APP.......![Audio Recognition](assets/Audio_recognition_feature.png)
+A view of the APP.......![Audio Recognition](images/Audio_recognition_feature.png)
 
 
