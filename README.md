@@ -1,69 +1,71 @@
-🌦️ Weather Forecast App
-A sleek desktop weather app built with Python and CustomTkinter, fetching real-time data from OpenWeatherMap, Geopy, and TimezoneFinder. 
-Features interactive maps, animated icons, and city search with auto-suggestions.
+<h1 align="center">🌦️ Weather Forecast App</h1>
 
-🚀 Key Features
-🔍 Search by city with auto-suggestions
+<p align="center" style="font-size: 18px; max-width: 800px; margin: auto;">
+  A sleek desktop weather app built with <strong>Python</strong> and <strong>CustomTkinter</strong>, fetching real-time data from <em>OpenWeatherMap</em>, <em>Geopy</em>, and <em>TimezoneFinder</em>. Features interactive maps, animated icons, and city search with auto-suggestions.
+</p>
 
-📊 Current weather: Temperature, humidity, wind speed, and conditions
+<hr/>
 
-🗺️ Interactive map (via tkintermapview)
+<h2>🚀 Key Features</h2>
+<ul>
+  <li>🔍 <strong>Search by city</strong> with auto-suggestions</li>
+  <li>📊 <strong>Current weather</strong>: Temperature, humidity, wind speed, and conditions</li>
+  <li>🗺️ <strong>Interactive map</strong> (via <code>tkintermapview</code>)</li>
+  <li>🌈 <strong>Lottie animations</strong> for dynamic weather icons</li>
+  <li>⏰ <strong>Real-time timezone</strong> and location handling</li>
+  <li>📜 <strong>Search history tracking</strong></li>
+</ul>
 
-🌈 Lottie animations for dynamic weather icons
+<h2>🛠️ Tech Stack</h2>
+<ul>
+  <li><strong>Language</strong>: Python 3.x</li>
+  <li><strong>GUI</strong>: CustomTkinter (modern UI)</li>
+  <li><strong>APIs</strong>:
+    <ul>
+      <li>🌤️ OpenWeatherMap (weather data) — <em>Get your API key and save it in a <code>.env</code> file</em></li>
+      <li>📍 Geopy (geocoding)</li>
+      <li>🕒 TimezoneFinder (timezone detection)</li>
+    </ul>
+  </li>
+  <li><strong>Map</strong>: tkintermapview (interactive maps)</li>
+  <li><strong>Animations</strong>: Lottie JSON files</li>
+</ul>
 
-⏰ Real-time timezone and location handling
+<h2>⚙️ Installation</h2>
 
-📜 Search history tracking
-
-🛠️ Tech Stack
-Language: Python 3.x
-
-GUI: CustomTkinter (modern UI)
-
-APIs:
-
-  ...OpenWeatherMap (weather data).....get your api key from OpenWeatherMap and save in a .env file
-
-  ...Geopy (geocoding)
-
- ...TimezoneFinder (timezone detection)
-
-Map: tkintermapview (interactive maps)
-
-Animations: Lottie JSON files
-
-⚙️ Installation
-1. Clone the repository
-bash
-git clone https://github.com/1efferson/weatherapp.git
-cd weatherapp
-2. Set up the virtual environment
-
-Windows:
+<ol>
+  <li>Clone the repository:
+    <pre><code>git clone https://github.com/1efferson/weatherapp.git
+cd weatherapp</code></pre>
+  </li>
+  <li>Set up the virtual environment:
+    <pre><code># Windows
 venv\Scripts\activate
 
-macOS/Linux:
-source venv/bin/activate
+# macOS/Linux
+source venv/bin/activate</code></pre>
+  </li>
+  <li>Install dependencies:
+    <pre><code>pip install -r requirements.txt</code></pre>
+  </li>
+  <li><strong>🚨 Restart VSCode</strong> before launching the app to ensure all dependencies and environment paths are loaded correctly.</li>
+  <li>Run the app:
+    <pre><code>python WeatherApp_main.py</code></pre>
+  </li>
+</ol>
 
-3. Install dependencies
-bash
-pip install -r requirements.txt
-
-4. Restart VSCode (Critical!)
-🚨 Before launching the app, restart VSCode to ensure all dependencies and environment paths are loaded correctly.
-
-5. Run the app
-bash
-python WeatherApp_main.py
-
-❓ Troubleshooting
-If the app crashes or dependencies aren’t detected, restart VSCode and re-activate the virtual environment.
-
-Ensure your API keys (OpenWeatherMap) are properly configured in the app.
-
+<h2>❓ Troubleshooting</h2>
+<ul>
+  <li>If the app crashes or dependencies aren’t detected, restart VSCode and re-activate the virtual environment.</li>
+  <li>Ensure your API keys (OpenWeatherMap) are properly configured in the app.</li>
+</ul>
 
 
-A view of the APP.......![Audio Recognition](Assets/images/Audio_recognition_feature.png)
+
+
+A view of the APP
+
+.......![Audio Recognition](Assets/images/Audio_recognition_feature.png)
 
 ![City Auto Suggestion](Assets/images/City_auto_suggestion_feature.png)
 
