@@ -6,6 +6,15 @@
 
 <hr/>
 
+<p A Preview of the APP>
+
+.......![Audio Recognition](Assets/images/Audio_recognition_feature.png)
+
+![City Auto Suggestion](Assets/images/City_auto_suggestion_feature.png)
+
+![Map Search Functionality](Assets/images/Map_search_functionality.png)
+<hr/>
+
 <h2>🚀 Key Features</h2>
 <ul>
   <li>🔍 <strong>Search by city</strong> with auto-suggestions</li>
@@ -87,13 +96,7 @@ venv\Scripts\activate
 
 
 
-A view of the APP
 
-.......![Audio Recognition](Assets/images/Audio_recognition_feature.png)
-
-![City Auto Suggestion](Assets/images/City_auto_suggestion_feature.png)
-
-![Map Search Functionality](Assets/images/Map_search_functionality.png)
 
 
 
