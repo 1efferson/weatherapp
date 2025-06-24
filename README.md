@@ -6,7 +6,7 @@
 
 <hr/>
 
-<p A Preview of the APP>
+<h2>A Preview of the APP</h2>
 
 .......![Audio Recognition](Assets/images/Audio_recognition_feature.png)
 
